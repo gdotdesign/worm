@@ -1,0 +1,57 @@
+<!DOCTYPE html>  <html> <head>   <title>Resource.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Collection.html">                 Collection.coffee               </a>                                           <a class="source" href="Orm.html">                 Orm.coffee               </a>                                           <a class="source" href="Record.html">                 Record.coffee               </a>                                           <a class="source" href="Resource.html">                 Resource.coffee               </a>                                           <a class="source" href="Schema.html">                 Schema.coffee               </a>                                           <a class="source" href="node_modules.html">                 node_modules               </a>                                           <a class="source" href="test.html">                 test.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Resource.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">_ = </span><span class="nx">require</span> <span class="s2">&quot;underscore&quot;</span>
+
+<span class="nv">Schema = </span><span class="nx">require</span> <span class="s1">&#39;./Schema.coffee&#39;</span>
+<span class="nv">Collection = </span><span class="nx">require</span> <span class="s1">&#39;./Collection.coffee&#39;</span>
+<span class="nv">Record = </span><span class="nx">require</span> <span class="s1">&#39;./Record.coffee&#39;</span>
+
+<span class="k">class</span> <span class="nx">Resource</span>
+  <span class="nv">constructor: </span><span class="o">-&gt;</span>
+    <span class="vi">@uid = </span><span class="mi">1</span>
+    <span class="vi">@store = </span><span class="p">[]</span>
+    <span class="vi">@schema = </span><span class="p">{}</span>
+    <span class="vi">@schema.id =</span>
+      <span class="nv">key: </span><span class="kc">true</span>
+      <span class="nv">unique: </span><span class="kc">true</span>
+      <span class="nv">required: </span><span class="kc">true</span>
+      <span class="nv">default: </span><span class="o">=&gt;</span>
+        <span class="nx">@uid</span><span class="o">++</span>
+  <span class="nv">update: </span><span class="o">-&gt;</span>
+  <span class="nv">find: </span><span class="o">-&gt;</span>
+  <span class="nv">all: </span><span class="nf">(obj) -&gt;</span>
+    <span class="k">new</span> <span class="nx">Collection</span><span class="p">(</span><span class="k">new</span> <span class="nx">Record</span> <span class="nx">data</span><span class="p">,</span> <span class="err">@</span> <span class="k">for</span> <span class="nx">data</span> <span class="k">in</span> <span class="nx">@store</span><span class="p">)</span>
+  <span class="nv">first: </span><span class="nf">(prop, value) -&gt;</span>
+    <span class="nv">data = </span><span class="nx">@store</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nf">(item) -&gt;</span>
+      <span class="nx">item</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">is</span> <span class="nx">value</span>
+    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nv">b = </span><span class="k">new</span> <span class="nx">Record</span> <span class="nx">data</span><span class="p">,</span> <span class="err">@</span>
+  <span class="nv">create: </span><span class="nf">(data) -&gt;</span> 
+    <span class="k">try</span>
+      <span class="nv">d = </span><span class="nx">Schema</span><span class="p">.</span><span class="nx">check</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">@schema</span><span class="p">,</span> <span class="nx">@store</span>
+      <span class="nx">@store</span><span class="p">.</span><span class="nx">push</span> <span class="nx">d</span>
+      <span class="nx">d</span><span class="p">.</span><span class="nx">id</span>
+    <span class="k">catch</span> <span class="nx">e</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">e</span>
+      </pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>DSL wrapper for create resources</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">module.exports = </span><span class="nf">(f) -&gt;</span>
+  <span class="k">try</span>
+    <span class="nv">a = </span><span class="nx">f</span><span class="p">.</span><span class="nx">call</span>
+      <span class="nv">self: </span><span class="k">new</span> <span class="nx">Resource</span>
+      <span class="nv">schema: </span><span class="p">{}</span>
+      <span class="nv">text: </span><span class="p">{}</span>
+      <span class="nv">property: </span><span class="nf">(name, type, descriptor = {}) -&gt;</span>
+        <span class="nv">d = </span><span class="nx">_</span><span class="p">.</span><span class="nx">defaults</span> <span class="nx">descriptor</span><span class="p">,</span> <span class="nx">type</span>
+        <span class="k">if</span> <span class="nx">Schema</span><span class="p">.</span><span class="nx">validate</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="nx">d</span><span class="p">,</span><span class="nx">@self</span><span class="p">.</span><span class="nx">schema</span><span class="p">)</span>
+          <span class="nx">@self</span><span class="p">.</span><span class="nx">schema</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">d</span>
+        <span class="err">@</span>
+      <span class="nv">name: </span><span class="nf">(name) -&gt;</span>
+        <span class="vi">@name = </span><span class="nx">name</span>
+        <span class="err">@</span>
+      <span class="nv">has: </span><span class="nf">(num, resource) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>@self.schema[resource] = new G.Orm.Association num, resource, @self</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="err">@</span>
+      <span class="nv">belongs_to: </span><span class="nf">(table) -&gt;</span>
+        <span class="nx">@self</span><span class="p">.</span><span class="nx">schema</span><span class="p">[</span><span class="nx">table</span><span class="o">+</span><span class="s2">&quot;_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="err">@</span>
+    <span class="nv">r = </span><span class="nx">a</span><span class="p">.</span><span class="nx">self</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>G.Orm.Mediator[a.name] = r</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">r</span>
+  <span class="k">catch</span> <span class="nx">e</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">e</span>
+  <span class="nx">r</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
